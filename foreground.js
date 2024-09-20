@@ -12,76 +12,101 @@ const getName = (li) => {
         .innerText.split("\n")[0];
 };
 
+const getId = (li) => {
+    const aEl = [...li.querySelectorAll("a")].find(
+        (a) => a.innerText.split("\n")[0] === getName(li)
+    );
+    return aEl.href.split(aEl.search)[0].split("/").reverse()[0];
+};
+
 const lightgreen = "rgb(187, 245, 187)";
+const lightgreener = "rgb(167, 245, 167)";
 const lightyellow = "rgb(243, 243, 183)";
 
-const recordButton = (imDiv, name) => {
+const recordButton = (name, id, imDiv) => {
     imDiv.style.position = "relative";
+    addCSS(`
+    .lmas-record-button{
+        position: absolute;
+        bottom: 0px;
+        left: 0px;
+        width: 100%;
+        background: ${lightgreen};
+        color: black;
+        border: none;
+        padding: 5px;
+        font-size: 12px;
+        cursor: pointer;
+        border-radius: 4px;
+        transition: all ease 0.2s;
+    }
+    .lmas-record-button:hover{
+        background: ${lightgreener};
+    }
+    `);
     const button = document.createElement("button");
     button.innerText = "+";
-    button.style.position = "absolute";
-    button.style.bottom = "0px";
-    button.style.left = "0px";
-    button.style.width = "100%";
-    button.style.background = lightgreen;
-    button.style.color = "black";
-    button.style.border = "none";
-    button.style.padding = "5px";
-    button.style.fontSize = "12px";
-    button.style.cursor = "pointer";
-    button.style.borderRadius = "4px";
     button.classList.add("lmas-record-button");
     button.addEventListener("click", async () => {
         const state = await getState();
-        if (!state.projects[state.active].known[name]) {
-            state.projects[state.active].known[name] = {};
+        if (!state.projects[state.active].known[id]) {
+            state.projects[state.active].known[id] = { name };
         }
-        state.projects[state.active].known[name].status = "recorded";
+        state.projects[state.active].known[id].status = "recorded";
         await setState(state);
         imDiv.parentElement.style.background = lightgreen;
         button.remove();
-        console.info("Recorded " + name);
+        console.info(`Recorded ${name} (${id})`);
     });
     return button;
 };
 
-const addRecordButtons = (names, imDivs, activeProject) => {
+const addRecordButtons = (names, ids, imDivs, activeProject) => {
     for (const k in imDivs) {
         if (!imDivs.hasOwnProperty(k)) continue;
-        if (activeProject.known[names[k]]) continue;
+        if (activeProject.known[ids[k]]) continue;
         const imDiv = imDivs[k];
         const name = names[k];
-        const button = recordButton(imDiv, name);
+        const id = ids[k];
+        const button = recordButton(name, id, imDiv);
         imDiv.appendChild(button);
     }
 };
 
-const addRecordAll = (names, lis) => {
+const addRecordAll = (names, ids, lis) => {
     const dividers = document.querySelectorAll(".entity-result__divider");
     const divider = dividers[dividers.length - 1];
     const button = document.createElement("button");
     button.innerText = "Record All";
-    button.style.position = "absolute";
-    button.style.bottom = "0px";
-    button.style.left = "0px";
-    button.style.width = "100%";
-    button.style.background = lightgreen;
-    button.style.color = "black";
-    button.style.border = "none";
-    button.style.padding = "5px";
-    button.style.fontSize = "12px";
-    button.style.cursor = "pointer";
-    button.style.borderRadius = "4px";
-    button.classList.add("lmas-record-button");
+    addCSS(`
+    #lmas-record-all{
+        position: absolute;
+        bottom: 0px;
+        left: 0px;
+        width: 100%;
+        background: ${lightgreen};
+        color: black;
+        border: none;
+        padding: 5px;
+        font-size: 12px;
+        cursor: pointer;
+        border-radius: 4px;
+        transition: all ease 0.2s;
+    }
+    #lmas-record-all:hover{
+        background: ${lightgreener};
+    }
+    `);
     button.id = "lmas-record-all";
     button.addEventListener("click", async () => {
         const state = await getState();
         let k = 0;
         for (const name of names) {
-            if (!state.projects[state.active].known[name]) {
-                state.projects[state.active].known[name] = {};
+            const id = ids[k];
+            if (!state.projects[state.active].known[id]) {
+                state.projects[state.active].known[id] = { name };
             }
-            state.projects[state.active].known[name].status = "recorded";
+            state.projects[state.active].known[id].status = "recorded";
             lis[k].style.background = lightgreen;
             k++;
         }
@@ -97,7 +122,10 @@ const addRecordAll = (names, lis) => {
 // Main
 (async () => {
     const state = await getState();
-    if (!state.active) return;
+    if (!state.active) {
+        console.info("No active project. Stopping.");
+        return;
+    }
     const activeProject = state.projects[state.active];
 
     let allPeople = new Set();
@@ -115,24 +143,25 @@ const addRecordAll = (names, lis) => {
     }
     const imDivs = peopleEls.map(getImDiv);
     const names = peopleEls.map(getName);
+    const ids = peopleEls.map(getId);
 
-    let n = 0;
+    let k = 0;
     let unknowns = false;
-    for (const name of names) {
-        if (activeProject.known[name]) {
-            console.log("I know " + name);
-            if (activeProject.known[name].status === "recorded") {
-                peopleEls[n].style.background = lightgreen;
+    for (const id of ids) {
+        if (activeProject.known[id]) {
+            console.log("I know " + names[k]);
+            if (activeProject.known[id].status === "recorded") {
+                peopleEls[k].style.background = lightgreen;
             }
         } else {
             unknowns = true;
-            if (allPeople.has(name)) {
-                peopleEls[n].style.background = lightyellow;
+            if (allPeople.has(id)) {
+                peopleEls[k].style.background = lightyellow;
             }
         }
-        n++;
+        k++;
     }
-    addRecordButtons(names, imDivs, activeProject);
-    unknowns && addRecordAll(names, peopleEls);
+    addRecordButtons(names, ids, imDivs, activeProject);
+    unknowns && addRecordAll(names, ids, peopleEls);
     setState(state);
 })();

@@ -38,3 +38,15 @@ const sleep = (t) =>
     new Promise((resolve, reject) => {
         setTimeout(resolve, t);
     });
+
+const addCSS = (css) => {
+    const style = document.createElement("style");
+
+    if (style.styleSheet) {
+        style.styleSheet.cssText = css;
+    } else {
+        style.appendChild(document.createTextNode(css));
+    }
+
+    document.getElementsByTagName("head")[0].appendChild(style);
+};
