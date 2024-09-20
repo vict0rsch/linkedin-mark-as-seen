@@ -12,6 +12,9 @@ const getName = (li) => {
         .innerText.split("\n")[0];
 };
 
+const lightgreen = "rgb(187, 245, 187)";
+const lightyellow = "rgb(243, 243, 183)";
+
 const recordButton = (imDiv, name) => {
     imDiv.style.position = "relative";
     const button = document.createElement("button");
@@ -20,7 +23,7 @@ const recordButton = (imDiv, name) => {
     button.style.bottom = "0px";
     button.style.left = "0px";
     button.style.width = "100%";
-    button.style.background = "lightgreen";
+    button.style.background = lightgreen;
     button.style.color = "black";
     button.style.border = "none";
     button.style.padding = "5px";
@@ -35,7 +38,7 @@ const recordButton = (imDiv, name) => {
         }
         state.projects[state.active].known[name].status = "recorded";
         await setState(state);
-        imDiv.parentElement.style.background = "lightgreen";
+        imDiv.parentElement.style.background = lightgreen;
         button.remove();
         console.info("Recorded " + name);
     });
@@ -62,7 +65,7 @@ const addRecordAll = (names, lis) => {
     button.style.bottom = "0px";
     button.style.left = "0px";
     button.style.width = "100%";
-    button.style.background = "lightgreen";
+    button.style.background = lightgreen;
     button.style.color = "black";
     button.style.border = "none";
     button.style.padding = "5px";
@@ -79,7 +82,7 @@ const addRecordAll = (names, lis) => {
                 state.projects[state.active].known[name] = {};
             }
             state.projects[state.active].known[name].status = "recorded";
-            lis[k].style.background = "lightgreen";
+            lis[k].style.background = lightgreen;
             k++;
         }
         await setState(state);
@@ -115,20 +118,22 @@ const addRecordAll = (names, lis) => {
     console.log("names :", names);
 
     let n = 0;
+    let unknowns = false;
     for (const name of names) {
         if (activeProject.known[name]) {
             console.log("I know " + name);
             if (activeProject.known[name].status === "recorded") {
-                peopleEls[n].style.background = "lightgreen";
+                peopleEls[n].style.background = lightgreen;
             }
         } else {
+            unknowns = true;
             if (allPeople.has(name)) {
-                peopleEls[n].style.background = "rgb(207, 207, 113)";
+                peopleEls[n].style.background = lightyellow;
             }
         }
         n++;
     }
     addRecordButtons(names, imDivs, activeProject);
-    addRecordAll(names, peopleEls);
+    unknowns && addRecordAll(names, peopleEls);
     setState(state);
 })();
