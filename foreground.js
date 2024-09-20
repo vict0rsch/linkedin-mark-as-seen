@@ -94,6 +94,7 @@ const addRecordAll = (names, lis) => {
     divider.insertAdjacentElement("beforebegin", button);
 };
 
+// Main
 (async () => {
     const state = await getState();
     if (!state.active) return;
