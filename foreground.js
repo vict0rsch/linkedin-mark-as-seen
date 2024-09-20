@@ -105,7 +105,6 @@ const addRecordAll = (names, lis) => {
         const ppl = new Set(Object.keys(p.known));
         allPeople = new Set([...allPeople, ...ppl]);
     }
-    console.log({ allPeople });
 
     let peopleEls = null;
 
@@ -115,7 +114,6 @@ const addRecordAll = (names, lis) => {
     }
     const imDivs = peopleEls.map(getImDiv);
     const names = peopleEls.map(getName);
-    console.log("names :", names);
 
     let n = 0;
     let unknowns = false;
