@@ -1,11 +1,68 @@
 body {
     background-color: #222;
     color: #eee;
+    min-width: 400px;
+    height: 100px;
+    padding: 36px;
+    font-size: 13px !important;
+}
 
-    width: 16rem;
-    height: 4rem;
+html {
+    font-family: "Roboto", sans-serif;
 }
 
 .special-text {
     color: red;
+}
+
+.active {
+    background-color: #d8ffd8;
+    border: 3px solid rgb(71, 201, 71) !important;
+}
+
+.project-card {
+    border: 1px solid lightgrey;
+    border-radius: 4px;
+    padding: 2px 8px;
+    margin: 12px auto;
+    position: relative;
+}
+
+button {
+    background: transparent;
+    border: 1px solid grey;
+    border-radius: 4px !important;
+    padding: 4px 8px;
+    color: #303030;
+    transition: all 0.2s;
+}
+button:hover {
+    background-color: #343434;
+    color: white;
+    border-color: #5ea2b8;
+    transform: scale(1.02);
+}
+.query-display {
+    font-size: 0.9rem;
+    color: grey;
+}
+.project-card-action-active:hover {
+    background-color: #5eb85f;
+}
+.project-card-action-delete:hover {
+    background-color: #cd6654;
+}
+.project-card-id {
+    position: absolute;
+    right: 10px;
+    top: 10px;
+    width: 20px;
+    height: 20px;
+    border: 2px solid #565656;
+    text-align: center;
+    border-radius: 100%;
+    font-size: 0.8rem;
+    color: #565656;
+    font-weight: bolder;
+    line-height: initial;
 }
