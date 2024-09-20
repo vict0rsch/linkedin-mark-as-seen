@@ -10,7 +10,7 @@ const hide = (queryOrElement) => show(queryOrElement, "none");
 
 const newId = (state) => {
     const pids = Object.values(state.projects).map((p) => p.id);
-    return Math.max(pids) + 1;
+    return Math.max(...pids) + 1;
 };
 
 const submitNewProject = async () => {
@@ -52,18 +52,18 @@ const submitNewProject = async () => {
 
 const makeProjectCard = (name, data) => `
     <div class="project-card">
-        <div class="project-card-id">${data.id}</div>
+        <div class="project-card-id" title="Project ID">${data.id}</div>
         <div class="project-card-header">
-            <h3 class="mt-3">${name}</h3>
-            <div class="project-card-action d-flex justify-content-center">
-                <button class="project-card-action-active mx-2">Set Active</button>
-                <button class="project-card-action-inactive mx-2">Deactivate</button>
-                <button class="project-card-action-delete mx-2">Delete</button>
-            </div>
+            <h3 class="mt-3 mb-3">${name}</h3>
         </div>
         <div class="project-card-body mt-2">
             <p>Candidates Seen: ${Object.keys(data.known).length}</p>
             <p class="query-display">${data.query}</p>
+        </div>
+        <div class="project-card-action d-flex justify-content-center mb-3">
+            <button class="project-card-action-active mx-2">Set Active</button>
+            <button class="project-card-action-inactive mx-2">Deactivate</button>
+            <button class="project-card-action-delete mx-2">Delete</button>
         </div>
     </div>
     `;
@@ -84,10 +84,14 @@ const setActive = (name) => {
 
 const updateProjectsView = async () => {
     const state = await getState();
-    const projectHTMLs = [];
+    let projectHTMLs = [];
+    let activeProjectHTML = null;
     for (const p in state.projects) {
-        projectHTMLs.push(makeProjectCard(p, state.projects[p]));
+        if (state.active === p)
+            activeProjectHTML = makeProjectCard(p, state.projects[p]);
+        else projectHTMLs.push(makeProjectCard(p, state.projects[p]));
     }
+    projectHTMLs = [activeProjectHTML, ...projectHTMLs];
     query("#project-list").innerHTML = projectHTMLs.join("");
     queryAll(".project-card-action-active").forEach((button) => {
         button.addEventListener("click", async () => {

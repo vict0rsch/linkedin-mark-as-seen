@@ -1,37 +1,64 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <link rel="stylesheet" href="popup.css">
-    <title>Chrome Addon v3: popup</title>
-    <!-- bootstrap -->
-    <link href="bootstrap.min.css" rel="stylesheet">
+    <head>
+        <meta charset="UTF-8" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap"
+            rel="stylesheet"
+        />
+        <link rel="stylesheet" href="popup.css" />
+        <title>Chrome Addon v3: popup</title>
+        <!-- bootstrap -->
+        <link href="bootstrap.min.css" rel="stylesheet" />
+    </head>
+    <body>
+        <div id="top-bar">
+            <div class="container">
+                <div class="row">
+                    <h2 class="mt-4 mb-0" id="header">LinkedIn Mark As Seen</h2>
+                </div>
+            </div>
+            <div class="container">
+                <div class="row" id="form-row">
+                    <!-- Form to create a project with fields: name, query -->
+                    <form id="create-project-form" target="#">
+                        <div class="mb-3">
+                            <input
+                                class="mb-2 w-100"
+                                type="text"
+                                class="form-control"
+                                id="project-name"
+                                name="project-name"
+                                placeholder="Project Name"
+                            />
+                            <input
+                                class="mb-2 w-100"
+                                type="text"
+                                class="form-control"
+                                id="project-query"
+                                name="project-query"
+                                placeholder="Query"
+                            />
 
-</head>
-<body>
-    <div class="container">
-        <div class="row">
-            <h2>LinkedIn Mark As Seen</h2>
+                            <button type="submit" class="btn btn-primary">
+                                Create Project
+                            </button>
+                            <div
+                                id="create-project-form-feedback"
+                                class="form-text"
+                            ></div>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
-    </div>
-    <div class="container">
-        <div class="row">
-                <!-- Form to create a project with fields: name, query -->
-                <form id="create-project-form" target="#">
-                    <div class="mb-3">
-                        <input class="mb-2" type="text" class="form-control" id="project-name" name="project-name" placeholder="Project Name">
-                        <input class="mb-2 w-100" type="text" class="form-control" id="project-query" name="project-query" placeholder="Query">
-
-                        <button type="submit" class="btn btn-primary">Create Project</button>
-                        <div id="create-project-form-feedback" class="form-text"></div>
-                    </div>
-                </form>
-                        
+        <div class="container">
+            <div id="project-list" class="row"></div>
         </div>
-        <div id="project-list" class="row"></div>
-    </div>
-    <script src="bootstrap.bundle.min.js"></script>
-    <script src="../utils.js"></script>
-    <script src="popup.js"></script>
-</body>
+        <script src="bootstrap.bundle.min.js"></script>
+        <script src="../utils.js"></script>
+        <script src="popup.js"></script>
+    </body>
 </html>
