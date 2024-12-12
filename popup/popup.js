@@ -61,12 +61,56 @@ const makeProjectCard = (name, data) => `
             <p class="query-display">${data.query}</p>
         </div>
         <div class="project-card-action d-flex justify-content-center mb-3">
+            <button class="project-card-action-show-candidate mx-2">Show candidates</button>
             <button class="project-card-action-active mx-2">Set Active</button>
             <button class="project-card-action-inactive mx-2">Deactivate</button>
             <button class="project-card-action-delete mx-2">Delete</button>
         </div>
     </div>
     `;
+
+const showCandidates = (known, project) => {
+    const knownHTML = Object.entries(known)
+        .map(
+            ([id, p], i) =>
+                `<div class="candidate-item">
+                    <a class="candidate-link" href="https://linkedin.com/in/${id}" data-id="${id}">${p.name}</a>
+                    <div class="delete-candidate" data-id="${id}">Delete</div>
+                </div>`
+        )
+        .join("");
+    getEl("#candidates-list").dataset.project = project;
+    getEl("#candidates-list").innerHTML = knownHTML;
+    getEl("#candidates-modal").scrollTop = 0;
+    getEl("#candidates-modal").style.display = "block";
+    queryAll(".candidate-link").forEach((link) => {
+        link.addEventListener("click", async (e) => {
+            e.preventDefault();
+            const href = e.target.href;
+            chrome.tabs.create({ url: href });
+        });
+    });
+};
+
+const normalizeString = (str) =>
+    str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
+const searchCandidates = async (query) => {
+    const normalize = normalizeString(query) === query;
+    const state = await getState();
+    const project = getEl("#candidates-list").dataset.project;
+    const known = state.projects[project].known;
+    const q = query.toLowerCase();
+    const selected = Object.fromEntries(
+        Object.entries(known).filter(([id, p], i) => {
+            let name = p.name.toLowerCase();
+            if (normalize) name = normalizeString(name);
+            const candidates = name.split(" ");
+            return candidates.some((c) => c.includes(q));
+        })
+    );
+    showCandidates(selected, project);
+};
 
 const setActive = (name) => {
     const projectCards = queryAll(".project-card");
@@ -140,11 +184,48 @@ const updateProjectsView = async () => {
     setActive(state.active);
 };
 
+const candidatesNonActive = (state) => {
+    getEl("#show-known-candidates").checked = Boolean(
+        state?.alwaysShowCandidates
+    );
+    getEl("#show-known-candidates").addEventListener("click", async () => {
+        const state = await getState();
+        const val = getValue("#show-known-candidates");
+        state.alwaysShowCandidates = val;
+        await setState(state);
+        console.log(`Show known candidates: ${val}`);
+    });
+};
+
 // Main
 (async () => {
+    const state = await getState();
     query("#create-project-form").addEventListener("submit", (e) => {
         e.preventDefault();
         submitNewProject();
     });
-    updateProjectsView();
+    await updateProjectsView();
+    candidatesNonActive(state);
+    queryAll(".project-card-action-show-candidate").forEach((button) => {
+        console.log("project-card-action-show-candidate");
+        button.addEventListener("click", async (e) => {
+            const el = e.target.parentElement.parentElement;
+            const state = await getState();
+            const id = el.querySelector(".project-card-id").innerText;
+            const project = Object.values(state.projects).find(
+                (p) => p.id == id
+            );
+            const name = el.querySelector("h3").innerText;
+            console.log("id :", id);
+            console.log("state :", state);
+            console.log("project :", project);
+            showCandidates(project.known, name);
+        });
+    });
+    getEl("#close-modal-button").addEventListener("click", () => {
+        getEl("#candidates-modal").style.display = "none";
+    });
+    getEl("#search-candidates").addEventListener("change", (e) => {
+        searchCandidates(getValue("#search-candidates"));
+    });
 })();
