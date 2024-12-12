@@ -1,7 +1,7 @@
 {
     // Comments are accepted in the manifest, even though it is JSON.
     "manifest_version": 3,
-    "name": "Chrome Extension v3 Starter",
+    "name": "LinkedIn Mark As Seen",
     "description": "A minimal example of a chrome extension using manifest v3",
     "version": "0.0.1",
     "icons": {
@@ -11,7 +11,7 @@
     },
     "options_page": "settings/settings.html",
     "action": {
-        "default_title": "Chrome Addon v3 Starter",
+        "default_title": "LinkedIn Mark As Seen",
         "default_popup": "popup/popup.html"
     },
     "permissions": ["storage"],
