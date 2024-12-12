@@ -49,6 +49,7 @@ button:hover {
 .query-display {
     font-size: 0.9rem;
     color: grey;
+    word-break: break-all;
 }
 .project-card-action-active:hover {
     background: linear-gradient(120deg, #17bdaf, #0574a3);
@@ -116,4 +117,58 @@ button[type="submit"]:hover {
 #top-bar {
     background: linear-gradient(120deg, #17bdaf, #0574a3);
     border-radius: 8px;
+}
+
+#config-div {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    margin: 8px 0px 16px;
+    color: #ffffff;
+}
+#config-div input {
+    margin-right: 8px;
+}
+#candidates-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    width: 100%;
+    background: linear-gradient(300deg, #151435, #19012a);
+    left: 0;
+    padding: 16px;
+    overflow: auto;
+    min-height: 100vh;
+}
+#close-modal {
+    position: fixed;
+    right: 16px;
+    top: 16px;
+    cursor: pointer;
+}
+#close-modal-button {
+    border-radius: 100% !important;
+    width: 30px;
+    height: 30px;
+    line-height: 0;
+    padding: 0;
+    background-color: #2b2b4d;
+}
+.candidate-item {
+    display: flex;
+    color: aliceblue !important;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 100%;
+    margin-bottom: 8px;
+    padding: 8px;
+    border-radius: 4px;
+}
+.candidate-item:hover {
+    color: white;
+    background: #2b2b4d;
+    box-shadow: 0 0 8px 0 rgba(0, 0, 0, 0.2);
+}
+.candidate-item a {
+    color: aliceblue !important;
 }
