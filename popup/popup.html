@@ -54,8 +54,36 @@
                 </div>
             </div>
         </div>
+        <div>
+            <div class="container">
+                <div id="config-div">
+                    <input type="checkbox" id="show-known-candidates" />
+                    <label for="show-known-candidates">
+                        Show known candidates even when no project is active
+                    </label>
+                </div>
+            </div>
+        </div>
         <div class="container">
             <div id="project-list" class="row"></div>
+        </div>
+        <div id="candidates-modal">
+            <div class="container">
+                <div id="close-modal">
+                    <button id="close-modal-button">&times;</button>
+                </div>
+                <div class="row">
+                    <div class="col-8">
+                        <input
+                            type="text"
+                            name="search-candidates"
+                            id="search-candidates"
+                        />
+                        <button id="search-candidates-button">Search</button>
+                    </div>
+                </div>
+                <div id="candidates-list" class="row"></div>
+            </div>
         </div>
         <script src="bootstrap.bundle.min.js"></script>
         <script src="../utils.js"></script>
