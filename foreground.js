@@ -1,16 +1,21 @@
 const getPeopleEls = () => {
-    return [...document.querySelectorAll(".reusable-search__result-container")];
+    return [
+        ...document
+            .querySelector(".search-results-container ul[role='list']")
+            .querySelectorAll("li"),
+    ];
 };
 
-const getImDiv = (li) => {
-    return li.querySelector(".entity-result__universal-image");
-};
+const getPersonDivs = (li) =>
+    [
+        ...li.querySelector("div").querySelector("div").querySelector("div")
+            .childNodes,
+    ].filter((e) => e.nodeName.toLowerCase().includes("div"));
 
-const getName = (li) => {
-    return li
-        .querySelector(".entity-result__title-text span")
-        .innerText.split("\n")[0];
-};
+const getImDiv = (li) => getPersonDivs(li)[0];
+
+const getName = (li) =>
+    getPersonDivs(li)[1].querySelector("span").innerText.split("\n")[0] || "";
 
 const getId = (li) => {
     const aEl = [...li.querySelectorAll("a")].find(
@@ -26,7 +31,7 @@ const lightyellow = "rgb(243, 243, 183)";
 const recordButton = (name, id, imDiv) => {
     imDiv.style.position = "relative";
     addCSS(`
-    .lmas-record-button{
+    .limas-record-button{
         width: 100%;
         background: linear-gradient(120deg, #17bdaf, #0574a3);
         color: white;
@@ -39,14 +44,14 @@ const recordButton = (name, id, imDiv) => {
         height: 30px;
         margin-top: 8px
     }
-    .lmas-record-button:hover{
+    .limas-record-button:hover{
         background: linear-gradient(120deg, #57fdcf, #35a4d3);
     }
     `);
     const button = document.createElement("button");
     button.innerText = "+";
-    button.classList.add("lmas-record-button");
-    button.title = `Record ${name} (${id}) in the active LMAS project.`;
+    button.classList.add("limas-record-button");
+    button.title = `Record ${name} (${id}) in the active limas project.`;
     button.addEventListener("click", async () => {
         const state = await getState();
         if (!state.projects[state.active].known[id]) {
@@ -73,12 +78,62 @@ const addRecordButtons = (names, ids, imDivs, activeProject) => {
     }
 };
 
-const addRecordAll = (names, ids, lis) => {
-    const ul = document.querySelector("ul.reusable-search__entity-result-list");
+const makePplToProjects = (state) => {
+    const ppl = {};
+    for (const p in state.projects) {
+        for (const id in state.projects[p].known) {
+            if (!ppl[id]) ppl[id] = [];
+            ppl[id].push(p);
+        }
+    }
+    return ppl;
+};
+
+const addProjects = (pplToProjects, ids, pplEls) => {
+    document
+        .querySelectorAll(".limas-project-list")
+        .forEach((el) => el.remove());
+    for (const k in pplEls) {
+        const pplEl = pplEls[k];
+        const id = ids[k];
+        const projects = pplToProjects[id];
+        console.log("projects :", projects);
+        if (!projects) continue;
+        const template = `
+            <div class="limas-project-list">
+                <strong>limas Projects</strong>
+                <br/>
+                ${projects
+                    .map((p) => (p.length > 30 ? p.slice(0, 30) + "..." : p))
+                    .join("<br/>")}
+            </div>`;
+        const col = getPersonDivs(pplEl)[2];
+        col.style.display = "flex";
+        col.style.flexDirection = "column";
+        col.style.alignItems = "center";
+        col?.insertAdjacentHTML("beforeend", template);
+    }
+    addCSS(
+        `
+        .limas-project-list{
+            margin-top: 8px;
+            font-size: 0.9rem;
+            font-style: italic;
+            font-color: lightgray;
+            font-weight: light;
+        }
+        `
+    );
+};
+
+const addRecordAll = (names, ids, pplToProjects, lis) => {
+    const ul = document.querySelector(
+        ".search-results-container ul[role='list']"
+    );
     const button = document.createElement("button");
     button.innerText = "Record All";
     addCSS(`
-    #lmas-record-all{
+    #limas-record-all{
         bottom: 0px;
         left: 0px;
         width: 30%;
@@ -94,11 +149,11 @@ const addRecordAll = (names, ids, lis) => {
         margin-top: 10px;
         margin-bottom: 15px;
     }
-    #lmas-record-all:hover{
+    #limas-record-all:hover{
         background: linear-gradient(120deg, #57fdcf, #35a4d3);
     }
     `);
-    button.id = "lmas-record-all";
+    button.id = "limas-record-all";
     button.addEventListener("click", async () => {
         const state = await getState();
         let k = 0;
@@ -106,6 +161,7 @@ const addRecordAll = (names, ids, lis) => {
             const id = ids[k];
             if (!state.projects[state.active].known[id]) {
                 state.projects[state.active].known[id] = { name };
+                console.info(`Added ${name} (${id}) to ${state.active}`);
             }
             state.projects[state.active].known[id].status = "recorded";
             lis[k].style.background = lightgreen;
@@ -114,8 +170,9 @@ const addRecordAll = (names, ids, lis) => {
         await setState(state);
         console.info("Recorded All.");
         document
-            .querySelectorAll(".lmas-record-button")
+            .querySelectorAll(".limas-record-button")
             .forEach((b) => b.remove());
+        addProjects(makePplToProjects(state), ids, lis);
     });
     const div = document.createElement("div");
     div.style.display = "flex";
@@ -124,11 +181,35 @@ const addRecordAll = (names, ids, lis) => {
     ul.parentElement.insertAdjacentElement("afterend", div);
 };
 
+const addTitle = (active) => {
+    const results = document.querySelector(".search-results-container");
+    results.insertAdjacentHTML(
+        "afterbegin",
+        `<h4 id="limas-title">Current limas Project: ${active}</h4>`
+    );
+    addCSS(`
+        #limas-title{
+            background: linear-gradient(120deg, #17bdaf, #0574a3);
+            color: white;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 8px 0px;
+            font-weight: 100;
+        }`);
+};
+
+var recCounter = 0;
+
 const main = async () => {
     const state = await getState();
+    console.log("LiMAS state :", state);
     if (!state.active) {
-        console.info("No active project. Stopping.");
-        return;
+        if (!state.alwaysShowCandidates) {
+            console.info(
+                "No active project and not alwaysShowCandidates. Stopping."
+            );
+            return;
+        }
     }
     const activeProject = state.projects[state.active];
 
@@ -141,19 +222,27 @@ const main = async () => {
 
     let peopleEls = getPeopleEls();
     if (!peopleEls || !peopleEls.length) {
+        recCounter++;
+        if (recCounter > 100) {
+            console.info("No peopleEls found. Stopping.");
+            return;
+        }
         setTimeout(main, 100);
     } else {
         const imDivs = peopleEls.map(getImDiv);
         const names = peopleEls.map(getName);
         const ids = peopleEls.map(getId);
+        const pplToProjects = makePplToProjects(state);
+
+        activeProject && addTitle(state.active);
 
         let k = 0;
         let unknowns = false;
         for (const id of ids) {
-            if (activeProject.known[id]) {
+            if (activeProject && activeProject.known[id]) {
                 console.log("I know " + names[k]);
                 if (activeProject.known[id].status === "recorded") {
-                    peopleEls[k].style.background = lightgreen;
+                    peopleEls[k].style.background = "#beeeed";
                 }
             } else {
                 unknowns = true;
@@ -163,12 +252,32 @@ const main = async () => {
             }
             k++;
         }
-        addRecordButtons(names, ids, imDivs, activeProject);
-        unknowns && addRecordAll(names, ids, peopleEls);
+        activeProject && addRecordButtons(names, ids, imDivs, activeProject);
+        addProjects(pplToProjects, ids, peopleEls);
+        activeProject &&
+            unknowns &&
+            addRecordAll(names, ids, pplToProjects, peopleEls);
         setState(state);
     }
 };
 // Main
-(async () => {
+async function ready(fn) {
+    if (document.readyState !== "loading") {
+        await fn();
+        return;
+    }
+    document.addEventListener("DOMContentLoaded", fn);
+}
+ready(async function () {
+    console.log("LiMAS is ready");
     main();
-})();
+    // enable navigation event listener
+    window.navigation.addEventListener("navigate", (event) => {
+        const interval = setInterval(() => {
+            if (document.querySelector(".search-results-container")) {
+                clearInterval(interval);
+                main();
+            }
+        }, 100);
+    });
+});
